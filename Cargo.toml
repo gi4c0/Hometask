@@ -1,0 +1,33 @@
+[package]
+name = "hometask"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "hometask_bin"
+path = "src/main.rs"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.82"
+axum = "0.7.5"
+serde = "1.0.198"
+serde_json = "1.0.116"
+sqlx = { version = "0.7.4", features = ["sqlite", "rust_decimal", "time", "migrate", "runtime-tokio"] }
+thiserror = "1.0.59"
+tokio = { version = "1.37.0", features = ["full"] }
+validator = { version = "0.15", features = ["derive"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter", "json", "tracing-log"] }
+tower-http = { version = "0.5.1", features = ["trace"] }
+tower = "0.4.13"
+strum = "0.26.2"
+strum_macros = "0.26.2"
+rust_decimal = "1.35.0"
+time = { version = "0.3.36", features = ["serde"] }
+uuid = { version = "1.8.0", features = ["v4"] }
+dotenvy = "0.15.7"
