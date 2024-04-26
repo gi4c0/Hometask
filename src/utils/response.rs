@@ -30,6 +30,18 @@ impl<T> ErrorResponse<T> {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct PaginatedResponse<T> {
+    pub data: Vec<T>,
+    pub total: i32,
+}
+
+impl<T: Serialize> PaginatedResponse<T> {
+    pub fn new(data: Vec<T>, total: i32) -> Json<Self> {
+        Json(PaginatedResponse { data, total })
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct DataResponse<T> {
     pub data: T,
 }
@@ -41,4 +53,5 @@ impl<T: Serialize> DataResponse<T> {
 }
 
 pub type AppResult<T> = Result<T, Error>;
-pub type HandlerResponse<T> = AppResult<Json<DataResponse<T>>>;
+pub type HandlerDataResponse<T> = AppResult<Json<DataResponse<T>>>;
+pub type HandlerPaginatedResponse<T> = AppResult<Json<PaginatedResponse<T>>>;

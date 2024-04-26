@@ -1,15 +1,15 @@
 use anyhow::Context;
 use axum::extract::{Query, State};
 use serde::{Deserialize, Serialize};
-use sqlx::SqlitePool;
+use sqlx::{prelude::FromRow, SqlitePool};
 use validator::Validate;
 
 use crate::{
     application::AppCtx,
+    enums::ContractStatus,
     models::profile::Profile,
     routes::contract::RawContract,
-    types::ProfileId,
-    utils::response::{AppResult, DataResponse, HandlerResponse},
+    utils::response::{AppResult, HandlerPaginatedResponse, PaginatedResponse},
 };
 
 use super::Contract;
@@ -25,49 +25,83 @@ pub async fn get_contracts_list(
     profile: Profile,
     Query(query): Query<Criteria>,
     state: State<AppCtx>,
-) -> HandlerResponse<Vec<Contract>> {
-    let list = get_list_of_contracts(&state.db, profile.id, &query).await?;
-    Ok(DataResponse::new(list))
+) -> HandlerPaginatedResponse<Contract> {
+    let (list, total) = tokio::try_join!(
+        get_list_of_contracts(&state.db, &profile, &query),
+        get_total(&state.db, &profile),
+    )?;
+
+    Ok(PaginatedResponse::new(list, total))
 }
 
 async fn get_list_of_contracts(
     db: &SqlitePool,
-    profile_id: ProfileId,
+    profile: &Profile,
     criteria: &Criteria,
 ) -> AppResult<Vec<Contract>> {
     let limit = criteria.limit.unwrap_or(50) as i64;
     let offset = criteria.offset.unwrap_or(0) as i64;
+    let status = ContractStatus::Terminated.as_ref();
 
-    let raw_contracts = sqlx::query_as!(
-        RawContract,
+    let raw_contracts: Vec<RawContract> = sqlx::query_as(&format!(
         r#"
             SELECT
                 id,
                 terms,
-                status as "status!",
-                "createdAt" as "created_at: String",
-                "updatedAt" AS "updated_at: String",
-                "ContractorId" AS "contractor_id!",
-                "ClientId" AS "client_id!"
+                status as "status",
+                "createdAt" as "created_at",
+                "updatedAt" AS "updated_at",
+                "ContractorId" AS "contractor_id",
+                "ClientId" AS "client_id"
             FROM
                 Contracts
             WHERE
-                ClientId = $1
-            LIMIT $2 OFFSET $3
+                {} = $1
+            AND
+                status != $2
+            LIMIT $3 OFFSET $4
         "#,
-        profile_id.0,
-        limit,
-        offset,
-    )
+        profile.kind.get_profile_filter()
+    ))
+    .bind(profile.id.0)
+    .bind(status)
+    .bind(limit)
+    .bind(offset)
     .fetch_all(db)
     .await
-    .with_context(|| format!("Failed to fetch list of contracts for user {profile_id}"))?;
+    .with_context(|| format!("Failed to fetch list of contracts for user {}", profile.id))?;
 
-    let mut contracts = Vec::with_capacity(50);
+    let mut contracts = Vec::with_capacity(limit as usize);
 
     for item in raw_contracts {
         contracts.push(item.into_contract()?);
     }
 
     Ok(contracts)
+}
+
+#[derive(FromRow)]
+struct Total {
+    total: i32,
+}
+
+async fn get_total(db: &SqlitePool, profile: &Profile) -> AppResult<i32> {
+    let status = ContractStatus::Terminated.as_ref();
+
+    let result: Total = sqlx::query_as(&format!(
+        r#"
+            SELECT COUNT(*) as total
+            FROM Contracts
+            WHERE {} = $1
+            AND status != $2
+        "#,
+        profile.kind.get_profile_filter()
+    ))
+    .bind(profile.id.0)
+    .bind(status)
+    .fetch_one(db)
+    .await
+    .context("Failed to count total Contracts")?;
+
+    Ok(result.total)
 }

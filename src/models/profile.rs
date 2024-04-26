@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{enums::ProfileType, types::ProfileId};
+use crate::{enums::ProfileKind, types::ProfileId};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Profile {
@@ -9,5 +9,5 @@ pub struct Profile {
     pub last_name: String,
     pub profession: String,
     pub balance: Option<f64>,
-    pub kind: ProfileType,
+    pub kind: ProfileKind,
 }

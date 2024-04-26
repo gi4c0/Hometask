@@ -9,10 +9,10 @@ use crate::{
     extractors::validate::ValidateParams,
     models::profile::Profile,
     routes::contract::RawContract,
-    types::{ContractId, ProfileId},
+    types::ContractId,
     utils::{
         err::Error,
-        response::{AppResult, DataResponse, HandlerResponse},
+        response::{AppResult, DataResponse, HandlerDataResponse},
     },
 };
 
@@ -28,8 +28,8 @@ pub async fn get_by_id(
     ctx: State<AppCtx>,
     profile: Profile,
     ValidateParams(params): ValidateParams<Params>,
-) -> HandlerResponse<Contract> {
-    let contract = get_contract_by_id(&ctx.db, &params.id, &profile.id).await?;
+) -> HandlerDataResponse<Contract> {
+    let contract = get_contract_by_id(&ctx.db, params.id, &profile).await?;
 
     match contract {
         Some(c) => Ok(DataResponse::new(c)),
@@ -39,30 +39,30 @@ pub async fn get_by_id(
 
 async fn get_contract_by_id(
     db: &SqlitePool,
-    contract_id: &ContractId,
-    client_id: &ProfileId,
+    contract_id: ContractId,
+    profile: &Profile,
 ) -> AppResult<Option<Contract>> {
-    let raw_contract = sqlx::query_as!(
-        RawContract,
+    let raw_contract: Option<RawContract> = sqlx::query_as(&format!(
         r#"
             SELECT
                 id,
                 terms,
-                status as "status!",
-                "createdAt" as "created_at: String",
-                "updatedAt" AS "updated_at: String",
-                "ContractorId" AS "contractor_id!",
-                "ClientId" AS "client_id!"
+                status as "status",
+                "createdAt" as "created_at",
+                "updatedAt" AS "updated_at",
+                "ContractorId" AS "contractor_id",
+                "ClientId" AS "client_id"
             FROM
                 Contracts
             WHERE
-                ClientId = $1
+                {} = $1
             AND
                 id = $2
         "#,
-        client_id.0,
-        contract_id.0
-    )
+        profile.kind.get_profile_filter(),
+    ))
+    .bind(profile.id.0)
+    .bind(contract_id.0)
     .fetch_optional(db)
     .await
     .with_context(|| format!("Failed to fetch contract {}", contract_id))?;

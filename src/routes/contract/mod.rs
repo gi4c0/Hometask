@@ -6,6 +6,7 @@ use axum::{routing::get, Router};
 pub use get_by_id::*;
 pub use list::*;
 use serde::{Deserialize, Serialize};
+use sqlx::prelude::FromRow;
 
 use crate::{
     application::AppCtx,
@@ -31,7 +32,7 @@ pub struct Contract {
     client_id: ProfileId,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, FromRow)]
 struct RawContract {
     id: i64,
     terms: String,

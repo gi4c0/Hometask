@@ -70,10 +70,19 @@ impl TestApp {
     pub async fn get_contract_by_id(&self, client_id: ProfileId, id: ContractId) -> Response {
         reqwest::Client::new()
             .get(format!("{}/contracts/{id}", &self.url))
-            .header("profile_id", client_id.0) // TODO: Try without `.0`
+            .header("profile_id", client_id.0)
             .send()
             .await
             .expect("Failed to request get_contract_by_id url")
+    }
+
+    pub async fn get_contracts_list(&self, client_id: ProfileId) -> Response {
+        reqwest::Client::new()
+            .get(format!("{}/contracts", &self.url))
+            .header("profile_id", client_id.0)
+            .send()
+            .await
+            .expect("Failed to request get_contracts_list url")
     }
 }
 

@@ -8,7 +8,7 @@ use axum::{
     RequestPartsExt,
 };
 
-use crate::{application::AppCtx, enums::ProfileType, models::profile::Profile, utils::err::Error};
+use crate::{application::AppCtx, enums::ProfileKind, models::profile::Profile, utils::err::Error};
 
 #[async_trait]
 impl<S> FromRequestParts<S> for Profile
@@ -60,7 +60,7 @@ where
             id: profile.id.into(),
             first_name: profile.first_name,
             last_name: profile.last_name,
-            kind: ProfileType::from_str(&profile.kind)
+            kind: ProfileKind::from_str(&profile.kind)
                 .with_context(|| format!("Invalid profile kind: {}", profile.kind))?,
             balance: profile.balance.flatten(),
             profession: profile.profession,
