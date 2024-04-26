@@ -10,7 +10,7 @@ use tower_http::trace::{self, TraceLayer};
 use tracing::{info_span, Level};
 use uuid::Uuid;
 
-use crate::{config::Config, routes::routes, utils::err::Err};
+use crate::{config::Config, routes::routes, utils::err::Error};
 
 #[derive(Clone)]
 pub struct AppCtx {
@@ -23,7 +23,7 @@ where
     Self: FromRef<S>,
     S: Send + Sync,
 {
-    type Rejection = Err;
+    type Rejection = Error;
 
     async fn from_request_parts(_parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         Ok(Self::from_ref(state))

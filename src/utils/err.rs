@@ -11,7 +11,7 @@ use validator::{ValidationErrors, ValidationErrorsKind};
 use super::response::ErrorResponse;
 
 #[derive(Error, Debug)]
-pub enum Err {
+pub enum Error {
     #[error(transparent)]
     ValidationError(#[from] ValidationErrors),
 
@@ -20,6 +20,9 @@ pub enum Err {
 
     #[error("Malformed JSON")]
     AxumJsonRejection(#[from] JsonRejection),
+
+    #[error("Not found")]
+    NotFound,
 
     #[error("Failed to pars path params")]
     AxumPathRejection(#[from] PathRejection),
@@ -33,10 +36,11 @@ pub enum Err {
 
 const INTERNAL_SERVER_ERROR: &str = "Internal Server Error";
 
-impl Err {
+impl Error {
     pub fn get_status(&self) -> StatusCode {
         match self {
             Self::Unauthorized => StatusCode::UNAUTHORIZED,
+            Self::NotFound => StatusCode::NOT_FOUND,
             Self::AxumJsonRejection(_) | Self::ValidationError(_) | Self::AxumPathRejection(_) => {
                 StatusCode::BAD_REQUEST
             }
@@ -45,7 +49,7 @@ impl Err {
     }
 }
 
-impl IntoResponse for Err {
+impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         match self {
             Self::Db(_) => {

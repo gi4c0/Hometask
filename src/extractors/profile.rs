@@ -8,7 +8,7 @@ use axum::{
     RequestPartsExt,
 };
 
-use crate::{application::AppCtx, enums::ProfileType, models::profile::Profile, utils::err::Err};
+use crate::{application::AppCtx, enums::ProfileType, models::profile::Profile, utils::err::Error};
 
 #[async_trait]
 impl<S> FromRequestParts<S> for Profile
@@ -16,20 +16,20 @@ where
     AppCtx: FromRef<S>,
     S: Sync + Send,
 {
-    type Rejection = Err;
+    type Rejection = Error;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let headers = HeaderMap::from_request_parts(parts, state)
             .await
-            .map_err(|e| Err::Internal(e.into()))?;
+            .map_err(|e| Error::Internal(e.into()))?;
 
-        let profile_id = headers.get("profile_id").ok_or(Err::Unauthorized)?;
+        let profile_id = headers.get("profile_id").ok_or(Error::Unauthorized)?;
 
         let profile_id = profile_id
             .to_str()
-            .map_err(|_| Err::Unauthorized)?
+            .map_err(|_| Error::Unauthorized)?
             .parse::<i64>()
-            .map_err(|_| Err::Unauthorized)?;
+            .map_err(|_| Error::Unauthorized)?;
 
         let state = parts
             .extract_with_state::<AppCtx, _>(state)
@@ -54,7 +54,7 @@ where
         )
         .fetch_optional(&state.db)
         .await?
-        .ok_or(Err::Unauthorized)?;
+        .ok_or(Error::Unauthorized)?;
 
         Ok(Profile {
             id: profile.id.into(),

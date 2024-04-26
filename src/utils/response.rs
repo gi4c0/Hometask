@@ -1,9 +1,9 @@
 use std::fmt::Display;
 
-use axum::{response::Response, Json};
+use axum::Json;
 use serde::{Deserialize, Serialize};
 
-use super::err::Err;
+use super::err::Error;
 
 #[derive(Serialize)]
 pub struct ErrorResponse<T> {
@@ -40,5 +40,5 @@ impl<T: Serialize> DataResponse<T> {
     }
 }
 
-pub type AppResult<T> = Result<T, Err>;
-pub type AppResponse = Result<Response, Err>;
+pub type AppResult<T> = Result<T, Error>;
+pub type HandlerResponse<T> = AppResult<Json<DataResponse<T>>>;

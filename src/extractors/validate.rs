@@ -7,7 +7,7 @@ use axum::{
 use serde::de::DeserializeOwned;
 use validator::Validate;
 
-use crate::utils::err::Err;
+use crate::utils::err::Error;
 
 pub struct ValidateJson<T>(pub T);
 
@@ -17,7 +17,7 @@ where
     S: Sync + Send,
     T: DeserializeOwned + Validate,
 {
-    type Rejection = Err;
+    type Rejection = Error;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
         let Json(value) = Json::<T>::from_request(req, state).await?;
@@ -35,7 +35,7 @@ where
     S: Sync + Send,
     T: DeserializeOwned + Validate + Send,
 {
-    type Rejection = Err;
+    type Rejection = Error;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let Path(value) = Path::<T>::from_request_parts(parts, state).await?;

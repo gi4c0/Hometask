@@ -1,17 +1,22 @@
 use anyhow::Context;
-use axum::{extract::State, http::StatusCode, response::IntoResponse};
-use serde::{Deserialize, Serialize};
+use axum::extract::State;
+use serde::Deserialize;
 use sqlx::SqlitePool;
 use validator::Validate;
 
 use crate::{
     application::AppCtx,
-    enums::ContractStatus,
     extractors::validate::ValidateParams,
     models::profile::Profile,
+    routes::contract::RawContract,
     types::{ContractId, ProfileId},
-    utils::response::{AppResponse, AppResult, DataResponse},
+    utils::{
+        err::Error,
+        response::{AppResult, DataResponse, HandlerResponse},
+    },
 };
+
+use super::Contract;
 
 #[derive(Deserialize, Validate)]
 pub struct Params {
@@ -23,12 +28,12 @@ pub async fn get_by_id(
     ctx: State<AppCtx>,
     profile: Profile,
     ValidateParams(params): ValidateParams<Params>,
-) -> AppResponse {
+) -> HandlerResponse<Contract> {
     let contract = get_contract_by_id(&ctx.db, &params.id, &profile.id).await?;
 
     match contract {
-        Some(c) => Ok((StatusCode::OK, DataResponse::new(c)).into_response()),
-        None => Ok((StatusCode::NOT_FOUND).into_response()),
+        Some(c) => Ok(DataResponse::new(c)),
+        None => Err(Error::NotFound),
     }
 }
 
@@ -37,7 +42,8 @@ async fn get_contract_by_id(
     contract_id: &ContractId,
     client_id: &ProfileId,
 ) -> AppResult<Option<Contract>> {
-    let contract = sqlx::query!(
+    let raw_contract = sqlx::query_as!(
+        RawContract,
         r#"
             SELECT
                 id,
@@ -59,33 +65,12 @@ async fn get_contract_by_id(
     )
     .fetch_optional(db)
     .await
-    .with_context(|| format!("Failed to fetch contract {}", contract_id.0))?;
+    .with_context(|| format!("Failed to fetch contract {}", contract_id))?;
 
-    let contract = match contract {
-        Some(row) => Some(Contract {
-            id: ContractId(row.id),
-            client_id: ProfileId(row.client_id),
-            contractor_id: ProfileId(row.contractor_id),
-            terms: row.terms,
-            status: row.status.parse().with_context(|| {
-                format!("Invalid DB value for status in contract: {}", contract_id.0)
-            })?,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-        }),
+    let contract = match raw_contract {
+        Some(r) => Some(r.into_contract()?),
         None => None,
     };
 
     Ok(contract)
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Contract {
-    id: ContractId,
-    terms: String,
-    status: ContractStatus,
-    created_at: String,
-    updated_at: String,
-    contractor_id: ProfileId,
-    client_id: ProfileId,
 }
