@@ -1,9 +1,10 @@
 use std::{borrow::Cow, collections::HashMap};
 
+use parse_display::Display;
 use serde::{Deserialize, Serialize};
 use validator::ValidationError;
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone, Copy, Display)]
 pub struct ContractId(pub i64);
 
 pub fn validate_contract_id(value: &ContractId) -> Result<(), ValidationError> {

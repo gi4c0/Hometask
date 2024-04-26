@@ -1,53 +1,41 @@
 -- Add migration script here
-INSERT INTO main.Profiles (
+INSERT INTO Profiles (
     id,
     firstName,
     lastName,
     profession,
     balance,
-    type
+    type,
+    createdAt,
+    updatedAt
 ) VALUES
-(1, 'Harry', 'Potter', 'Wizard', 1150, 'client'),
+(1, 'Harry', 'Potter', 'Wizard', 1150, 'client', '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(2, 'Mr', 'Robot', 'Hacker', 231.11, 'client', '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(3, 'John', 'Snow', 'Knows nothing', 451.3, 'client', '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(4, 'Ash', 'Kethcum', 'Pokemon master', 1.3, 'client', '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(5, 'John', 'Lenon', 'Musician', 64, 'contractor', '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(6, 'Linus', 'Torvalds', 'Programmer', 1214, 'contractor', '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(7, 'Alan', 'Turing', 'Programmer', 22, 'contractor', '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(8, 'Aragorn', 'II Elessar Telcontarvalds', 'Fighter', 314, 'contractor', '2024-04-26 17:23:00', '2024-04-26 17:23:00');
 
-(2, 'Mr', 'Robot', 'Hacker', 231.11, 'client'),
-
-(3, 'John', 'Snow', 'Knows nothing', 451.3, 'client'),
-
-(4, 'Ash', 'Kethcum', 'Pokemon master', 1.3, 'client'),
-
-(5, 'John', 'Lenon', 'Musician', 64, 'contractor'),
-
-(6, 'Linus', 'Torvalds', 'Programmer', 1214, 'contractor'),
-
-(7, 'Alan', 'Turing', 'Programmer', 22, 'contractor'),
-
-(8, 'Aragorn', 'II Elessar Telcontarvalds', 'Fighter', 314, 'contractor');
-
-INSERT INTO main.Contracts (
+INSERT INTO Contracts (
     id,
     terms,
     status,
     ClientId,
-    ContractorId
+    ContractorId,
+    createdAt,
+    updatedAt
 ) VALUES 
-
-(1, 'bla bla bla', 'terminated', 1, 5),
-
-(2, 'bla bla bla', 'in_progress', 1, 6),
-
-(3, 'bla bla bla', 'in_progress', 2, 6),
-
-(4, 'bla bla bla', 'in_progress', 2, 7),
-
-(5, 'bla bla bla', 'new', 3, 8),
-
-(6, 'bla bla bla', 'in_progress', 3, 7),
-
-(7, 'bla bla bla', 'in_progress', 4, 7),
-
-(8, 'bla bla bla', 'in_progress', 4, 6),
-
-(9, 'bla bla bla', 'in_progress', 4, 8);
+(1, 'bla bla bla', 'terminated', 1, 5, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(2, 'bla bla bla', 'in_progress', 1, 6, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(3, 'bla bla bla', 'in_progress', 2, 6, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(4, 'bla bla bla', 'in_progress', 2, 7, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(5, 'bla bla bla', 'new', 3, 8, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(6, 'bla bla bla', 'in_progress', 3, 7, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(7, 'bla bla bla', 'in_progress', 4, 7, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(8, 'bla bla bla', 'in_progress', 4, 6, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+(9, 'bla bla bla', 'in_progress', 4, 8, '2024-04-26 17:23:00', '2024-04-26 17:23:00');
 
 
 INSERT INTO Jobs (
@@ -55,20 +43,22 @@ INSERT INTO Jobs (
     price,
     paid,
     paymentDate,
-    ContractId
+    ContractId,
+    createdAt,
+    updatedAt
 ) VALUES
-('work', 200, 0, NULL, 1),
-('work', 201, 0, NULL, 2),
-('work', 202, 0, NULL, 3),
-('work', 200, 0, NULL, 4),
-('work', 200, 0, NULL, 7),
-('work', 2020, 1, '2020-08-15T19:11:26.737Z', 7),
-('work', 200, 1, '2020-08-15T19:11:26.737Z', 2),
-('work', 200, 1, '2020-08-16T19:11:26.737Z', 3),
-('work', 200, 1, '2020-08-17T19:11:26.737Z', 1),
-('work', 200, 1, '2020-08-17T19:11:26.737Z', 5),
-('work', 21, 1, '2020-08-10T19:11:26.737Z', 1),
-('work', 21, 1, '2020-08-15T19:11:26.737Z', 2),
-('work', 121, 1, '2020-08-15T19:11:26.737Z', 3),
-('work', 121, 1, '2020-08-14T23:11:26.737Z', 3),
+('work', 200, 0, NULL, 1, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 201, 0, NULL, 2, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 202, 0, NULL, 3, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 200, 0, NULL, 4, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 200, 0, NULL, 7, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 2020, 1, '2020-08-15T19:11:26.737Z', 7, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 200, 1, '2020-08-15T19:11:26.737Z', 2, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 200, 1, '2020-08-16T19:11:26.737Z', 3, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 200, 1, '2020-08-17T19:11:26.737Z', 1, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 200, 1, '2020-08-17T19:11:26.737Z', 5, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 21, 1, '2020-08-10T19:11:26.737Z', 1, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 21, 1, '2020-08-15T19:11:26.737Z', 2, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 121, 1, '2020-08-15T19:11:26.737Z', 3, '2024-04-26 17:23:00', '2024-04-26 17:23:00'),
+('work', 121, 1, '2020-08-14T23:11:26.737Z', 3, '2024-04-26 17:23:00', '2024-04-26 17:23:00');
 

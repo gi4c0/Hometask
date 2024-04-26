@@ -1,17 +1,17 @@
 -- Add migration script here
-create table main.Contracts
+create table Contracts
 (
     id           INTEGER
         primary key autoincrement,
     terms        TEXT     not null,
     status       VARCHAR(20) DEFAULT 'new',
-    createdAt    DATETIME not null,
-    updatedAt    DATETIME not null,
+    createdAt  DATETIME     not null default (datetime('now', 'local')),
+    updatedAt  DATETIME     not null default (datetime('now', 'local')),
     ContractorId INTEGER
-                          references main.Profiles
+                          references Profiles
                               on update cascade on delete set null,
     ClientId     INTEGER
-                          references main.Profiles
+                          references Profiles
                               on update cascade on delete set null
 );
 

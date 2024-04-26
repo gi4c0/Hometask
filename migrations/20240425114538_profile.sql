@@ -1,5 +1,5 @@
 -- Add migration script here
-create table main.Profiles
+create table Profiles
 (
     id         INTEGER
         primary key autoincrement,
@@ -8,7 +8,6 @@ create table main.Profiles
     profession VARCHAR(255) not null,
     balance    DECIMAL(12, 2) not null,
     type       VARCHAR(20),
-    createdAt  DATETIME     not null,
-    updatedAt  DATETIME     not null
+    createdAt  DATETIME     not null default (datetime('now', 'local')),
+    updatedAt  DATETIME     not null default (datetime('now', 'local'))
 );
-
