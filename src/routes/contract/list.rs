@@ -1,25 +1,16 @@
 use anyhow::Context;
 use axum::extract::{Query, State};
-use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, SqlitePool};
-use validator::Validate;
+use sqlx::SqlitePool;
 
 use crate::{
     application::AppCtx,
     enums::ContractStatus,
-    models::profile::Profile,
+    models::{profile::Profile, Criteria, Total},
     routes::contract::RawContract,
     utils::response::{AppResult, HandlerPaginatedResponse, PaginatedResponse},
 };
 
 use super::Contract;
-
-#[derive(Debug, Serialize, Deserialize, Validate)]
-pub struct Criteria {
-    #[validate(range(max = 100))]
-    pub limit: Option<usize>,
-    pub offset: Option<usize>,
-}
 
 pub async fn get_contracts_list(
     profile: Profile,
@@ -78,11 +69,6 @@ async fn get_list_of_contracts(
     }
 
     Ok(contracts)
-}
-
-#[derive(FromRow)]
-struct Total {
-    total: i32,
 }
 
 async fn get_total(db: &SqlitePool, profile: &Profile) -> AppResult<i32> {
