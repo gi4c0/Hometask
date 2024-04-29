@@ -27,6 +27,9 @@ pub enum Error {
     #[error("Not found")]
     NotFound,
 
+    #[error("{0}")]
+    BadRequest(String),
+
     #[error("Failed to parse path params")]
     AxumPathRejection(#[from] PathRejection),
 
@@ -46,6 +49,7 @@ impl Error {
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::Db(_) | Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::AxumJsonRejection(_)
+            | Self::BadRequest(_)
             | Self::AxumQueryRejection(_)
             | Self::ValidationError(_)
             | Self::AxumPathRejection(_) => StatusCode::BAD_REQUEST,

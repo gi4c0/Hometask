@@ -3,7 +3,7 @@ use std::fs;
 use lib::{
     application::Application,
     config::{AppConfig, Config},
-    types::{ContractId, ProfileId},
+    types::{ContractId, JobId, ProfileId},
 };
 use project_root::get_project_root;
 use reqwest::Response;
@@ -15,6 +15,7 @@ use uuid::Uuid;
 pub struct TestApp {
     db_filename: String,
     url: String,
+    pub db: SqlitePool,
 }
 
 async fn init_tracing() {
@@ -62,6 +63,7 @@ impl TestApp {
         tokio::spawn(app.run());
 
         Self {
+            db: pool,
             db_filename,
             url: format!("http://localhost:{port}"),
         }
@@ -88,6 +90,15 @@ impl TestApp {
     pub async fn get_unpaid_jobs(&self, profile_id: ProfileId) -> Response {
         reqwest::Client::new()
             .get(format!("{}/jobs/unpaid", &self.url))
+            .header("profile_id", profile_id.0)
+            .send()
+            .await
+            .expect("Failed to request get_contracts_list url")
+    }
+
+    pub async fn pay(&self, profile_id: ProfileId, job_id: JobId) -> Response {
+        reqwest::Client::new()
+            .post(format!("{}/jobs/{job_id}/pay", &self.url))
             .header("profile_id", profile_id.0)
             .send()
             .await

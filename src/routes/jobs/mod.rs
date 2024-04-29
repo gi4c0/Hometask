@@ -1,6 +1,11 @@
+mod pay;
 mod unpaid;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
+pub use pay::*;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 pub use unpaid::*;
@@ -11,7 +16,9 @@ use crate::{
 };
 
 pub fn routes() -> Router<AppCtx> {
-    Router::new().route("/jobs/unpaid", get(get_unpaid_jobs))
+    Router::new()
+        .route("/jobs/unpaid", get(get_unpaid_jobs))
+        .route("/jobs/:job_id/pay", post(pay))
 }
 
 #[derive(Debug, Serialize, Deserialize)]

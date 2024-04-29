@@ -4,11 +4,14 @@ use anyhow::Context;
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
-    http::{request::Parts, HeaderMap},
+    http::request::Parts,
     RequestPartsExt,
 };
 
-use crate::{application::AppCtx, enums::ProfileKind, models::profile::Profile, utils::err::Error};
+use crate::{
+    application::AppCtx, enums::ProfileKind, models::profile::Profile, types::ProfileId,
+    utils::err::Error,
+};
 
 #[async_trait]
 impl<S> FromRequestParts<S> for Profile
@@ -19,17 +22,7 @@ where
     type Rejection = Error;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let headers = HeaderMap::from_request_parts(parts, state)
-            .await
-            .map_err(|e| Error::Internal(e.into()))?;
-
-        let profile_id = headers.get("profile_id").ok_or(Error::Unauthorized)?;
-
-        let profile_id = profile_id
-            .to_str()
-            .map_err(|_| Error::Unauthorized)?
-            .parse::<i64>()
-            .map_err(|_| Error::Unauthorized)?;
+        let profile_id = ProfileId::from_request_parts(parts, state).await?;
 
         let state = parts
             .extract_with_state::<AppCtx, _>(state)
@@ -50,7 +43,7 @@ where
                 WHERE
                     id = $1
             "#,
-            profile_id
+            profile_id.0
         )
         .fetch_optional(&state.db)
         .await?
