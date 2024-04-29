@@ -30,7 +30,7 @@ async fn init_tracing() {
 static TRACING: OnceCell<()> = OnceCell::const_new();
 
 impl TestApp {
-    pub async fn spawn() -> Self {
+    pub async fn build() -> Self {
         TRACING.get_or_init(init_tracing).await;
         let db_name = Uuid::new_v4().to_string();
 
@@ -80,6 +80,15 @@ impl TestApp {
         reqwest::Client::new()
             .get(format!("{}/contracts", &self.url))
             .header("profile_id", client_id.0)
+            .send()
+            .await
+            .expect("Failed to request get_contracts_list url")
+    }
+
+    pub async fn get_unpaid_jobs(&self, profile_id: ProfileId) -> Response {
+        reqwest::Client::new()
+            .get(format!("{}/jobs/unpaid", &self.url))
+            .header("profile_id", profile_id.0)
             .send()
             .await
             .expect("Failed to request get_contracts_list url")

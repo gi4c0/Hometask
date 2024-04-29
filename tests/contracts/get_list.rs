@@ -6,7 +6,7 @@ use crate::helper::test_app::TestApp;
 
 #[tokio::test]
 async fn return_contract_list() {
-    let app = TestApp::spawn().await;
+    let app = TestApp::build().await;
 
     let response = app.get_contracts_list(ProfileId(1)).await;
     assert_eq!(response.status().as_u16(), StatusCode::OK);
