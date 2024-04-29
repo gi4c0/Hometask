@@ -1,5 +1,5 @@
 use axum::{
-    extract::rejection::{JsonRejection, PathRejection},
+    extract::rejection::{JsonRejection, PathRejection, QueryRejection},
     http::StatusCode,
     response::IntoResponse,
     Json,
@@ -21,10 +21,13 @@ pub enum Error {
     #[error("Malformed JSON")]
     AxumJsonRejection(#[from] JsonRejection),
 
+    #[error("Failed to parse query params")]
+    AxumQueryRejection(#[from] QueryRejection),
+
     #[error("Not found")]
     NotFound,
 
-    #[error("Failed to pars path params")]
+    #[error("Failed to parse path params")]
     AxumPathRejection(#[from] PathRejection),
 
     #[error(transparent)]
@@ -41,10 +44,11 @@ impl Error {
         match self {
             Self::Unauthorized => StatusCode::UNAUTHORIZED,
             Self::NotFound => StatusCode::NOT_FOUND,
-            Self::AxumJsonRejection(_) | Self::ValidationError(_) | Self::AxumPathRejection(_) => {
-                StatusCode::BAD_REQUEST
-            }
             Self::Db(_) | Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::AxumJsonRejection(_)
+            | Self::AxumQueryRejection(_)
+            | Self::ValidationError(_)
+            | Self::AxumPathRejection(_) => StatusCode::BAD_REQUEST,
         }
     }
 }

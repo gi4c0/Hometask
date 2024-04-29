@@ -1,11 +1,12 @@
 use anyhow::Context;
-use axum::extract::{Query, State};
+use axum::extract::State;
 use sqlx::SqlitePool;
 
 use crate::{
     application::AppCtx,
     enums::ContractStatus,
-    models::{profile::Profile, Criteria, Total},
+    extractors::QueryPagination,
+    models::{profile::Profile, Total},
     utils::response::{AppResult, HandlerPaginatedResponse, PaginatedResponse},
 };
 
@@ -14,11 +15,11 @@ use super::{Job, RawJob};
 pub async fn get_unpaid_jobs(
     state: State<AppCtx>,
     profile: Profile,
-    Query(criteria): Query<Criteria>,
+    pagination: QueryPagination,
 ) -> HandlerPaginatedResponse<Job> {
     let (total, jobs) = tokio::try_join!(
         get_total_unpaid_jobs(&state.db, &profile),
-        load_unpaid_jobs(&state.db, &profile, &criteria)
+        load_unpaid_jobs(&state.db, &profile, &pagination)
     )?;
 
     Ok(PaginatedResponse::new(jobs, total))
@@ -27,7 +28,7 @@ pub async fn get_unpaid_jobs(
 async fn load_unpaid_jobs(
     db: &SqlitePool,
     profile: &Profile,
-    criteria: &Criteria,
+    pagination: &QueryPagination,
 ) -> AppResult<Vec<Job>> {
     let new_status = ContractStatus::New.as_ref();
     let in_progress_status = ContractStatus::InProgress.as_ref();
@@ -56,13 +57,13 @@ async fn load_unpaid_jobs(
     .bind(profile.id.0)
     .bind(new_status)
     .bind(in_progress_status)
-    .bind(criteria.limit.unwrap_or(50) as i64)
-    .bind(criteria.offset.unwrap_or(0) as i64)
+    .bind(pagination.limit as i64)
+    .bind(pagination.offset as i64)
     .fetch_all(db)
     .await
     .with_context(|| format!("Failed to fetch unpaid jobs for profile: {}", profile.id))?;
 
-    let mut result = vec![];
+    let mut result = Vec::with_capacity(pagination.limit);
 
     for row in raw_jobs {
         result.push(row.into_job());

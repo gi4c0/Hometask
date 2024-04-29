@@ -1,11 +1,12 @@
 use anyhow::Context;
-use axum::extract::{Query, State};
+use axum::extract::State;
 use sqlx::SqlitePool;
 
 use crate::{
     application::AppCtx,
     enums::ContractStatus,
-    models::{profile::Profile, Criteria, Total},
+    extractors::QueryPagination,
+    models::{profile::Profile, Total},
     routes::contract::RawContract,
     utils::response::{AppResult, HandlerPaginatedResponse, PaginatedResponse},
 };
@@ -14,11 +15,11 @@ use super::Contract;
 
 pub async fn get_contracts_list(
     profile: Profile,
-    Query(query): Query<Criteria>,
+    pagination: QueryPagination,
     state: State<AppCtx>,
 ) -> HandlerPaginatedResponse<Contract> {
     let (list, total) = tokio::try_join!(
-        get_list_of_contracts(&state.db, &profile, &query),
+        get_list_of_contracts(&state.db, &profile, &pagination),
         get_total(&state.db, &profile),
     )?;
 
@@ -28,10 +29,8 @@ pub async fn get_contracts_list(
 async fn get_list_of_contracts(
     db: &SqlitePool,
     profile: &Profile,
-    criteria: &Criteria,
+    pagination: &QueryPagination,
 ) -> AppResult<Vec<Contract>> {
-    let limit = criteria.limit.unwrap_or(50) as i64;
-    let offset = criteria.offset.unwrap_or(0) as i64;
     let status = ContractStatus::Terminated.as_ref();
 
     let raw_contracts: Vec<RawContract> = sqlx::query_as(&format!(
@@ -56,13 +55,13 @@ async fn get_list_of_contracts(
     ))
     .bind(profile.id.0)
     .bind(status)
-    .bind(limit)
-    .bind(offset)
+    .bind(pagination.limit as i64)
+    .bind(pagination.offset as i64)
     .fetch_all(db)
     .await
     .with_context(|| format!("Failed to fetch list of contracts for user {}", profile.id))?;
 
-    let mut contracts = Vec::with_capacity(limit as usize);
+    let mut contracts = Vec::with_capacity(pagination.limit);
 
     for item in raw_contracts {
         contracts.push(item.into_contract()?);
