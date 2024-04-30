@@ -1,8 +1,4 @@
-use sqlx::FromRow;
-
+mod handler;
 pub mod profile;
 
-#[derive(FromRow)]
-pub struct Total {
-    pub total: i32,
-}
+pub use handler::*;

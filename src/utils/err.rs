@@ -78,16 +78,17 @@ impl IntoResponse for Error {
             }
 
             Self::ValidationError(e) => {
-                let json =
-                    ErrorResponse::with_data("Input validation error", format_validator_errors(&e));
+                let messages = format_validator_errors(&e);
+                error!("{:?}", messages);
+
+                let json = ErrorResponse::with_data("Input validation error", messages);
                 return (StatusCode::BAD_REQUEST, Json(json)).into_response();
             }
             _ => (),
         };
 
         let message = self.to_string();
-        error!(message);
-
+        error!("{message}");
         (self.get_status(), Json(ErrorResponse::message(message))).into_response()
     }
 }

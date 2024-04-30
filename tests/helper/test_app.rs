@@ -103,7 +103,7 @@ impl TestApp {
             .header("profile_id", profile_id.0)
             .send()
             .await
-            .expect("Failed to request get_contracts_list url")
+            .expect("Failed to request pay job url")
     }
 
     pub async fn deposit(&self, profile_id: ProfileId, target: ProfileId, amount: f64) -> Response {
@@ -115,7 +115,18 @@ impl TestApp {
             .json(&body)
             .send()
             .await
-            .expect("Failed to request get_contracts_list url")
+            .expect("Failed to request deposit url")
+    }
+
+    pub async fn get_best_profession(&self, start: &str, end: &str) -> Response {
+        reqwest::Client::new()
+            .get(format!(
+                "{}/admin/best-profession?start={}&end={}",
+                &self.url, start, end
+            ))
+            .send()
+            .await
+            .expect("Failed to request best profession url")
     }
 }
 

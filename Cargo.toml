@@ -28,7 +28,7 @@ tower = "0.4.13"
 strum = "0.26.2"
 strum_macros = "0.26.2"
 rust_decimal = "1.35.0"
-time = { version = "0.3.36", features = ["serde"] }
+time = { version = "0.3.36", features = ["serde-human-readable"] }
 uuid = { version = "1.8.0", features = ["v4"] }
 dotenvy = "0.15.7"
 project-root = "=0.2.0"
