@@ -85,11 +85,10 @@ impl IntoResponse for Error {
             _ => (),
         };
 
-        (
-            self.get_status(),
-            Json(ErrorResponse::message(self.to_string())),
-        )
-            .into_response()
+        let message = self.to_string();
+        error!(message);
+
+        (self.get_status(), Json(ErrorResponse::message(message))).into_response()
     }
 }
 

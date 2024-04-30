@@ -7,6 +7,7 @@ use lib::{
 };
 use project_root::get_project_root;
 use reqwest::Response;
+use serde_json::json;
 use sqlx::{sqlite::SqliteConnectOptions, SqlitePool};
 use tokio::sync::OnceCell;
 use tracing::Level;
@@ -100,6 +101,18 @@ impl TestApp {
         reqwest::Client::new()
             .post(format!("{}/jobs/{job_id}/pay", &self.url))
             .header("profile_id", profile_id.0)
+            .send()
+            .await
+            .expect("Failed to request get_contracts_list url")
+    }
+
+    pub async fn deposit(&self, profile_id: ProfileId, target: ProfileId, amount: f64) -> Response {
+        let body = json!({ "amount": amount });
+
+        reqwest::Client::new()
+            .post(format!("{}/balances/{target}/deposit", &self.url))
+            .header("profile_id", profile_id.0)
+            .json(&body)
             .send()
             .await
             .expect("Failed to request get_contracts_list url")

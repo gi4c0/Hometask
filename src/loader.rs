@@ -3,7 +3,19 @@ use sqlx::{Sqlite, Transaction};
 
 use crate::{types::ProfileId, utils::response::AppResult};
 
-pub async fn update_balance(
+pub async fn transfer_money(
+    t: &mut Transaction<'_, Sqlite>,
+    delta: f64,
+    source_profile_id: ProfileId,
+    target_profile_id: ProfileId,
+) -> AppResult<()> {
+    update_balance(t, -delta, source_profile_id).await?;
+    update_balance(t, delta, target_profile_id).await?;
+
+    Ok(())
+}
+
+async fn update_balance(
     t: &mut Transaction<'_, Sqlite>,
     delta: f64,
     profile_id: ProfileId,

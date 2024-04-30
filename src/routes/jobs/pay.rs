@@ -6,7 +6,7 @@ use sqlx::{Sqlite, Transaction};
 use crate::{
     application::AppCtx,
     enums::ContractStatus,
-    loader::update_balance,
+    loader::transfer_money,
     types::{JobId, ProfileId},
     utils::{
         err::Error,
@@ -41,8 +41,14 @@ pub async fn pay(
         )));
     }
 
-    update_balance(&mut t, -collected_data.price, profile_id).await?;
-    update_balance(&mut t, collected_data.price, collected_data.contractor_id).await?;
+    transfer_money(
+        &mut t,
+        collected_data.price,
+        profile_id,
+        collected_data.contractor_id,
+    )
+    .await?;
+
     update_job(&mut t, params.job_id).await?;
 
     t.commit().await.with_context(|| {
