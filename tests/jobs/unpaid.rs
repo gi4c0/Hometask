@@ -12,7 +12,6 @@ async fn return_unpaid_jobs() {
     assert_eq!(StatusCode::OK, result.status().as_u16());
 
     let json: Value = result.json().await.unwrap();
-    dbg!(&json);
     assert_eq!(json["total"].as_u64().unwrap(), 2);
 
     let data = json["data"].as_array().unwrap();

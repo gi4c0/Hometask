@@ -1,5 +1,5 @@
 use anyhow::Context;
-use axum::extract::{Query, State};
+use axum::extract::State;
 use sqlx::SqlitePool;
 
 use crate::{
@@ -9,10 +9,10 @@ use crate::{
 };
 
 pub async fn best_profession(
-    Query(query): Query<TimeRange>,
+    time_range: TimeRange,
     state: State<AppCtx>,
 ) -> HandlerDataResponse<Option<String>> {
-    let profession = get_best_profession(&state.db, &query).await?;
+    let profession = get_best_profession(&state.db, &time_range).await?;
     Ok(DataResponse::new(profession))
 }
 
