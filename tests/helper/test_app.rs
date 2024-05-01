@@ -128,6 +128,17 @@ impl TestApp {
             .await
             .expect("Failed to request best profession url")
     }
+
+    pub async fn get_best_clients(&self, limit: usize, start: &str, end: &str) -> Response {
+        reqwest::Client::new()
+            .get(format!(
+                "{}/admin/best-clients?start={}&end={}&limit={}",
+                &self.url, start, end, limit
+            ))
+            .send()
+            .await
+            .expect("Failed to request best profession url")
+    }
 }
 
 impl Drop for TestApp {

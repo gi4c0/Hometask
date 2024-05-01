@@ -9,7 +9,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::err::Error;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, From, Display)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, From, Display, sqlx::Type)]
+#[sqlx(transparent)]
 pub struct ProfileId(pub i64);
 
 #[async_trait]
